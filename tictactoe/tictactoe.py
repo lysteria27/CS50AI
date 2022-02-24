@@ -74,7 +74,14 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    raise NotImplementedError
+    copy_board = board[:]
+    i = action[0]
+    j = action[1]
+    if copy_board[i][j] is None:
+        copy_board[i][j] = player(copy_board)
+        return copy_board
+    else:
+        raise Exception("Invalid action")
 
 
 def winner(board):
@@ -88,15 +95,28 @@ def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
-    raise NotImplementedError
+    flag = False
+    for row in board:
+        for cell in row:
+
+            #If even one cell is empty
+            if cell is None:
+                return False
+    flag = True
+    return flag
 
 
 def utility(board):
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
-    raise NotImplementedError
-
+    champ = winner(board)
+    if champ=="X":
+        return 1
+    elif champ=="O":
+        return -1
+    else:
+        return 0
 
 def minimax(board):
     """
