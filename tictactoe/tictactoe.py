@@ -31,7 +31,7 @@ def player(board):
         for cell in row:
 
             #Flag to recognize an initial state
-            empty_state = (type(cell)==None)
+            empty_state = cell is None
 
             #Keeping track of number of Xs and Os played
             if cell=="X":
@@ -62,10 +62,11 @@ def actions(board):
 
     for row in board:
         for cell in row:
-            if type(cell)==None:
+            if cell is None:
                 s.add((i, j))
             j +=1
         i +=1
+        j = 0
     return s
 
 
@@ -103,18 +104,31 @@ def minimax(board):
     """
     action_list = []
     val_list = []
+
+    #Player X's turn
     if player(board)=="X":
         for action in actions(board):
+
+            #Utility of each immediate action
             val = min_value(result(board, action))
+
             action_list.append(action)
             val_list.append(val)
+        
+        #Finding the optimal action by choosing one of maximum utility
         opt_action = action_list[val_list.index(max(val_list))]
-
+    
+    #Player O's turn
     else:
         for action in actions(board):
+
+            #Utility of each immediate action
             val = max_value(result(board, action))
+
             action_list.append(action)
             val_list.append(val)
+        
+        #Finding the optimal action by choosing one of minimum utility
         opt_action = action_list[val_list.index(min(val_list))]
     
     return opt_action
