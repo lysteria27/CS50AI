@@ -41,22 +41,32 @@ def player(board):
 
     #If board is in initial state
     if empty_state:
-        return X
+        return "X"
 
     #Turn of player O
     elif num_X > num_O:
-        return O
+        return "O"
 
     #Turn of player X
     elif num_X==num_O:
-        return X
+        return "X"
 
 
 def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    raise NotImplementedError
+    i = 0 
+    j = 0
+    s = set()
+
+    for row in board:
+        for cell in row:
+            if type(cell)==None:
+                s.add((i, j))
+            j +=1
+        i +=1
+    return s
 
 
 def result(board, action):
@@ -91,4 +101,36 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    raise NotImplementedError
+    action_list = []
+    val_list = []
+    if player(board)=="X":
+        for action in actions(board):
+            val = min_value(result(board, action))
+            action_list.append(action)
+            val_list.append(val)
+        opt_action = action_list[val_list.index(max(val_list))]
+
+    else:
+        for action in actions(board):
+            val = max_value(result(board, action))
+            action_list.append(action)
+            val_list.append(val)
+        opt_action = action_list[val_list.index(min(val_list))]
+    
+    return opt_action
+
+def max_value(board):
+    v = float('-inf')
+    if terminal(board):
+        return utility(board)
+    for action in actions(board):
+        v = max(v, min_value(result(board, action)))
+    return v
+
+def min_value(board):
+    v = float('inf')
+    if terminal(board):
+        return utility(board)
+    for action in actions(board):
+        v = min(v, max_value(result(board, action)))
+    return v
