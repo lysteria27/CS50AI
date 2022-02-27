@@ -3,6 +3,7 @@ Tic Tac Toe Player
 """
 
 import math
+import copy
 
 X = "X"
 O = "O"
@@ -40,7 +41,7 @@ def player(board):
                 num_O +=1
 
     #If board is in initial state
-    if empty_state:
+    if empty_state and num_X==0 and num_O==0:
         return "X"
 
     #Turn of player O
@@ -58,12 +59,12 @@ def actions(board):
     """
     i = 0 
     j = 0
-    s = set()
+    s = []
 
     for row in board:
         for cell in row:
             if cell is None:
-                s.add((i, j))
+                s.append((i, j))
             j +=1
         i +=1
         j = 0
@@ -74,10 +75,10 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    copy_board = board[:]
+    copy_board = copy.deepcopy(board)
     i = action[0]
     j = action[1]
-    if copy_board[i][j] is None:
+    if copy_board[i][j] is EMPTY:
         copy_board[i][j] = player(copy_board)
         return copy_board
     else:
@@ -88,7 +89,50 @@ def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
-    raise NotImplementedError
+
+    counter = 1
+
+    #Checking for a winner horizontally
+    for i in range(3):
+        ele = board[i][0]
+        for j in range(1, 3):
+            if ele != board[i][j]:
+                break
+            else:
+                counter +=1
+        if counter==3:
+            return ele
+        counter = 1
+
+    counter = 1
+    
+    #Checking for a winner vertically
+    for i in range(3):
+        ele = board[0][i]
+        for j in range(1, 3):
+            if ele != board[j][i]:
+                break
+            else:
+                counter +=1
+        if counter==3:
+            return ele
+        counter = 1
+
+    #Checking for a winner on the left diagonal
+    ele = board[0][0]
+    if ele==board[1][1]:
+        if ele==board[2][2]:
+            return ele
+    
+    ele = board[0][2]
+    if ele==board[1][1]:
+        if ele==board[2][0]:
+            return ele
+    
+    #If the neither of the conditions are satisfied
+    #We have a tie
+    return None
+
 
 
 def terminal(board):
@@ -125,6 +169,9 @@ def minimax(board):
     action_list = []
     val_list = []
 
+    if terminal(board):
+        return winner(board)
+
     #Player X's turn
     if player(board)=="X":
         for action in actions(board):
@@ -157,14 +204,29 @@ def max_value(board):
     v = float('-inf')
     if terminal(board):
         return utility(board)
+    elif winner(board)!=None:
+        return utility(board)
     for action in actions(board):
-        v = max(v, min_value(result(board, action)))
+        v1 = min_value(result(board, action))
+        if v1>v:
+            v = v1
+            if v==1:
+                return v
+
     return v
 
 def min_value(board):
+
     v = float('inf')
     if terminal(board):
         return utility(board)
+    elif winner(board)!=None:
+        return utility(board)
     for action in actions(board):
-        v = min(v, max_value(result(board, action)))
+        v1 = max_value(result(board, action))
+        if v1<v:
+            v = v1
+            if v==-1:
+                return v
+
     return v
