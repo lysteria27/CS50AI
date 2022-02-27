@@ -173,7 +173,7 @@ def minimax(board):
     val_list = []
 
     if terminal(board):
-        return winner(board)
+        return None
 
     #Player X's turn
     if player(board)=="X":
