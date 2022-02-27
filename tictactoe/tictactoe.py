@@ -59,12 +59,12 @@ def actions(board):
     """
     i = 0 
     j = 0
-    s = []
+    s = set()
 
     for row in board:
         for cell in row:
             if cell is None:
-                s.append((i, j))
+                s.add((i, j))
             j +=1
         i +=1
         j = 0
