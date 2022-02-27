@@ -139,6 +139,9 @@ def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
+    if winner(board)!=None:
+        return True
+    
     flag = False
     for row in board:
         for cell in row:
