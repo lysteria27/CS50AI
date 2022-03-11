@@ -109,7 +109,7 @@ class Sentence():
             if len(self.cells)==self.count:
                 return self.cells
         else:
-            return {}
+            return set()
 
     def known_safes(self):
         """
@@ -118,7 +118,7 @@ class Sentence():
         if self.count==0:
             return self.cells
         else:
-            return {}
+            return set()
 
     def mark_mine(self, cell):
         """
@@ -254,6 +254,7 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+        print("Known mine:", self.mines)
         for cell in self.safes:
             if cell not in self.moves_made and cell not in self.mines:
                 return cell
