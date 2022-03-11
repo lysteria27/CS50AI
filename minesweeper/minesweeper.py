@@ -193,8 +193,43 @@ class MinesweeperAI():
                if they can be inferred from existing knowledge
         """
         self.moves_made.add(cell)
-        self.safes.add(cell)
+        self.mark_safe(cell)        
+        neighbours = set()
+
+        for i in range(cell[0]-1, cell[0]+2):
+            for j in range(cell[1]-1, cell[1]+2):
+
+                # Ignore the cell itself
+                if (i, j) == cell:
+                    continue
+
+                # Update neighbours if cell is in bounds
+                if 0 <= i < self.height and 0 <= j < self.width:
+                    neighbours.add((i, j))
         
+        # New sentence is added to knowledge base
+        sentence = Sentence(neighbours, count)
+        self.knowledge.append(sentence)
+
+        # The new sentence is checked to infer if any new mines or safes can be found
+        mines = sentence.known_mines()
+        safes = sentence.known_safes()
+        copy_mines = mines.copy()
+        copy_safes = safes.copy()
+        if len(mines) !=0:
+            for mine in copy_mines:
+                self.mark_mine(mine)
+        if len(safes) !=0:
+            for safe in copy_safes:
+                self.mark_safe(safe)
+
+        # If there exists a subset then update knowledge base    
+        for i in range(len(self.knowledge)-1):
+            s1 = self.knowledge[i]
+            s2 = self.knowledge[i+1]
+            if (s1.cells).issubset(s2.cells):
+                s3 = Sentence((s2.cells).difference(s1.cells), s2.count-s1.count)
+                self.knowledge(s3)
 
     def make_safe_move(self):
         """
