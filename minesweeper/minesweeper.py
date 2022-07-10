@@ -1,3 +1,4 @@
+from copy import copy
 import itertools
 import random
 
@@ -220,16 +221,30 @@ class MinesweeperAI():
         sentence = Sentence(neighbours, count)
         self.knowledge.append(sentence)
 
-        # The new sentence is checked to infer if any new mines or safes can be found
-        mines = sentence.known_mines()
-        safes = sentence.known_safes()
-        
-        if mines is not None:
-            copy_mines = mines.copy()
-            for mine in copy_mines:
-                self.mark_mine(mine)
+        knowledge_changed = True
 
-            # Remove any empty sentences from knowledge base:
+        while knowledge_changed:
+            knowledge_changed = False
+
+            safes = set()
+            mines = set()
+
+            # Get set of safe spaces and mines from KB
+            for sentence in self.knowledge:
+                safes = safes.union(sentence.known_safes())
+                if sentence.known_mines():
+                    mines = mines.union(sentence.known_mines())
+
+            # Mark any safe spaces or mines:
+            if safes:
+                knowledge_changed = True
+                for safe in safes:
+                    self.mark_safe(safe)
+            if mines:
+                knowledge_changed = True
+                for mine in mines:
+                    self.mark_mine(mine)
+
             empty = Sentence(set(), 0)
 
             self.knowledge[:] = [x for x in self.knowledge if x != empty]
@@ -248,34 +263,17 @@ class MinesweeperAI():
 
                     # Create a new sentence if 1 is subset of 2, and not in KB:
                     if sentence_1.cells.issubset(sentence_2.cells):
-                        new_sentence_cells = sentence_2.cells - sentence_1.cells
-                        new_sentence_count = sentence_2.count - sentence_1.count
+                        new_cells = sentence_2.cells - sentence_1.cells
+                        new_count = sentence_2.count - sentence_1.count
 
-                        new_sentence = Sentence(new_sentence_cells, new_sentence_count)
+                        new_sentence = Sentence(new_cells, new_count)
 
                         # Add to knowledge if not already in KB:
                         if new_sentence not in self.knowledge:
                             knowledge_changed = True
-                            print('New Inferred Knowledge: ', new_sentence, 'from', sentence_1, ' and ', sentence_2)
+                            #print('New Inferred Knowledge: ', new_sentence, 'from', sentence_1, ' and ', sentence_2)
                             self.knowledge.append(new_sentence)
 
-        # Print out AI current knowledge to terminal:
-        print('Current AI KB length: ', len(self.knowledge))
-        print('Known Mines: ', self.mines)
-        print('Safe Moves Remaining: ', self.safes - self.moves_made)
-        print('====================================================')
-            
-        # If there exists a subset then update knowledge base    
-        for i in range(len(self.knowledge)-1):
-            s1 = self.knowledge[i]
-            s2 = self.knowledge[i+1]
-            if (s1.cells).issubset(s2.cells):
-                s3 = Sentence((s2.cells).difference(s1.cells), s2.count-s1.count)
-                self.knowledge.append(s3)
-                if s3.count == 0:
-                    self.mark_safe(cell in s3.cells)
-                if len(s3.cells) == s3.count:
-                    self.mark_mine(cell in s3.cells)
 
     def make_safe_move(self):
         """
@@ -286,7 +284,7 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        print("Known mine:", self.mines)
+        #print("Known mine:", self.mines)
         for cell in self.safes:
             if cell not in self.moves_made and cell not in self.mines:
                 return cell
