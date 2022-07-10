@@ -228,11 +228,43 @@ class MinesweeperAI():
             copy_mines = mines.copy()
             for mine in copy_mines:
                 self.mark_mine(mine)
-        if safes is not None:
-            copy_safes = safes.copy()
-            for safe in copy_safes:
-                self.mark_safe(safe)
 
+            # Remove any empty sentences from knowledge base:
+            empty = Sentence(set(), 0)
+
+            self.knowledge[:] = [x for x in self.knowledge if x != empty]
+
+            # Try to infer new sentences from the current ones:
+            for sentence_1 in self.knowledge:
+                for sentence_2 in self.knowledge:
+
+                    # Ignore when sentences are identical
+                    if sentence_1.cells == sentence_2.cells:
+                        continue
+
+                    if sentence_1.cells == set() and sentence_1.count > 0:
+                        print('Error - sentence with no cells and count created')
+                        raise ValueError
+
+                    # Create a new sentence if 1 is subset of 2, and not in KB:
+                    if sentence_1.cells.issubset(sentence_2.cells):
+                        new_sentence_cells = sentence_2.cells - sentence_1.cells
+                        new_sentence_count = sentence_2.count - sentence_1.count
+
+                        new_sentence = Sentence(new_sentence_cells, new_sentence_count)
+
+                        # Add to knowledge if not already in KB:
+                        if new_sentence not in self.knowledge:
+                            knowledge_changed = True
+                            print('New Inferred Knowledge: ', new_sentence, 'from', sentence_1, ' and ', sentence_2)
+                            self.knowledge.append(new_sentence)
+
+        # Print out AI current knowledge to terminal:
+        print('Current AI KB length: ', len(self.knowledge))
+        print('Known Mines: ', self.mines)
+        print('Safe Moves Remaining: ', self.safes - self.moves_made)
+        print('====================================================')
+            
         # If there exists a subset then update knowledge base    
         for i in range(len(self.knowledge)-1):
             s1 = self.knowledge[i]
