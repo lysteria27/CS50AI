@@ -25,7 +25,7 @@ def crawl(directory):
     """
     Parse a directory of HTML pages and check for links to other pages.
     Return a dictionary where each key is a page, and values are
-    a list of all other pages in the corpus that are linked to by the page.
+    a set of all other pages in the corpus that are linked to by the page.
     """
     pages = dict()
 
@@ -57,8 +57,22 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-    raise NotImplementedError
+    no_of_links = len(corpus[page])
+    model = {}
+    for pg in corpus.keys():
+        model[pg] = (1 - damping_factor) / len(corpus.keys())
+    #print(model)
 
+    if no_of_links:
+        for pg in corpus[page]:
+            model[pg] += damping_factor / no_of_links
+
+    #if page has no links, then we can pretend it has links to all pages in the corpus, including itself
+    else:
+        for pg in corpus.keys():
+            model[pg] += damping_factor / len(corpus.keys())
+
+    return model
 
 def sample_pagerank(corpus, damping_factor, n):
     """
