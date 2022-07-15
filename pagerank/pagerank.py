@@ -125,6 +125,7 @@ def iterate_pagerank(corpus, damping_factor):
     newrank = {}
     N = len(corpus.keys())
     total = 0.0
+    count = 0
 
     for page in corpus:
         pagerank[page] = 1/N
@@ -149,12 +150,17 @@ def iterate_pagerank(corpus, damping_factor):
 
         for page in corpus:
             if not math.isclose(newrank[page], pagerank[page], abs_tol=0.001):
+                pagerank[page] = newrank[page]
                 isTrue = True
             
-            if not isTrue:
-                continue
+            else:
+                count += 1
+            
+            if count == N:
+                isTrue = False
+                break
 
-            pagerank[page] = newrank[page]
+            
 
     return pagerank
 
